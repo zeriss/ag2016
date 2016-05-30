@@ -1,0 +1,157 @@
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<!-- <link rel="import" href="../bower_components/iron-icons/iron-icons.html"> -->
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+
+<dom-module id="ag-site-nav">
+  <style>
+    :host {
+      display: block;
+    }
+
+    a.site-nav {
+      display:flex;
+      color: #6b6b6b;
+      background: white;
+      border-bottom: 1px solid #eaedef;
+      padding: 4px 4px 4px 30px;
+      font-weight: 300;
+      font-size: 15px;
+      line-height: 40px;
+
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      flex-direction: row;
+
+    }
+    a.site-nav span {
+      flex:1;
+    }
+
+    a.site-nav.active {
+      font-weight:700;
+      color:black;
+    }
+
+    a.site-nav.level-2.indent {
+      padding-left: 40px;
+      color: black;
+    }
+
+
+  </style>
+  <template>
+    <!-- <iron-selector attr-for-selected="href" selected="[[route.path]]" selected-class="active"> -->
+        <template is="dom-repeat" items="[[sections]]" as="section" >
+          <a href="/[[section.value]]" class="site-nav level-1" name="[[section.value]]"><span>[[section.label]]</span>
+            <template is="dom-if" if="[[section.leafs]]">
+              <paper-icon-button icon="icons:expand-more" on-tap="_expandClicked"></paper-icon-button>
+            </template>
+          </a>
+          <iron-collapse >
+            <div>
+            <template is="dom-repeat" items="[[section.leafs]]">
+                <a href="/[[section.value]]#[[item.value]]" class="site-nav level-2 indent" name="[[section.value]]">[[item.label]]</a>
+            </template>
+            </div>
+          </iron-collapse>
+
+        </template>
+    <!-- </iron-selector> -->
+
+  </template>
+<script>
+Polymer({
+  is: "ag-site-nav",
+  properties: {
+    route: {
+      type: Object,
+      notify: true,
+      observer: '_routeChanged'
+    },
+    sections: {
+      type: Array,
+      value: function() {
+        return [
+          {
+            label:'agile Grenoble',
+            value:'agileGrenoble',
+            leafs: [
+              {label:'accueil',value:'home'},
+              {label:'notre histoire',value:'history'}
+            ]
+          },
+          {
+            label:'agile4kids',
+            value:'agile4kids',
+            leafs: [
+              {label:'accueil',value:'home'},
+              {label:'notre histoire',value:'history'}
+            ]
+          }
+        ];
+      }
+    }
+  },
+
+_expandClicked: function(event) {
+  var iconButton = Polymer.dom(event).localTarget;
+  var navLink = iconButton.parentNode;
+  var navCollapse = navLink.nextElementSibling;
+  // navCollapse.toggle();
+  // iconButton.icon = navCollapse.opened ? "icons:expand-less": "icons:expand-more";
+
+  // Don't actually click the link.
+  event.preventDefault();
+  event.stopImmediatePropagation();
+},
+
+_routeChanged: function(newValue, oldValue) {
+  var s = Polymer.dom(this.root).querySelectorAll('a.site-nav[name="' + this.route.path + '"]')
+    , r = s[s.length - 1];
+
+  r && (this.toggleClass("iron-selected", !0, r), this.styleLinkPath(r, !0));
+},
+
+styleLinkPath: function(elem,t) {
+  var i = e.classList;
+  i.contains('level-1') ? this._styleLevel1Link(elem, t) :
+                          i.contains('level-2') && i.contains('indent') ? this._styleLevel2Link(elem, t) :
+                          i.contains('level-3') && this._styleLevel3Link(elem, t);
+},
+
+_styleLevel1Link: function(elem, t) {
+  this.toggleClass('active', t, elem);
+  var n = Polymer.dom(e).nextElementSibling;
+  for (this._showOrHideCollapse(elem, state),
+  links = Polymer.dom(this).querySelectorAll('a.level-1'),
+  i = 0; i < links.length; i++) {
+    elem!==links[i] && (this._showOrHideCollapse(links[i], !1),
+    this.toggleClass("active", !1, links[i]),
+    this.toggleClass("greyed-out", n.opened, links[i]));
+  }
+
+},
+
+_styleLevel2Link: function(elem, t) {
+
+},
+
+_styleLevel3Link: function(elem, t) {
+
+},
+
+_showOrHideCollapse: function(elem, state) {
+  var collapseElem = Polymer.dom(e).nextElementSibling
+    , iconButtonElem = Polymer.dom(e).querySelector('paper-icon-button');
+  iconButtonElem && collapseElem && (state ? (iconButtonElem.icon = 'expand-less',
+  collapseElem.show()) : (iconButtonElem.icon = 'expand-more',collapseElem.hide()));
+}
+
+});
+</script>
+
+</dom-module>
